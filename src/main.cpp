@@ -7,13 +7,10 @@
 *********/
 
 #include <Arduino.h>
-#include <WiFi.h>
-#include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include "SPIFFS.h"
 #include <Arduino_JSON.h>
 #include <Adafruit_BME280.h>
-#include <Adafruit_Sensor.h>
 #include "Secrets.h"    //all the secret stuff goes here such as ssid, passwords, etc.
 
 // Replace with your network credentials

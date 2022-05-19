@@ -34,11 +34,11 @@ var gaugeTemp = new LinearGauge({
           "from": 30,
           "to": 40,
           "color": "rgba(200, 50, 50, .75)"
-      }
-  ],
-  colorPlate: "#fff",
-  colorBarProgress: "#CC2936",
-  colorBarProgressEnd: "#049faa",
+        }
+      ],
+      colorPlate: "#fff",
+      colorBarProgress: "#CC2936",
+      colorBarProgressEnd: "#049faa",
   borderShadowWidth: 0,
   borders: false,
   needleType: "arrow",
@@ -50,7 +50,7 @@ var gaugeTemp = new LinearGauge({
   animationRule: "linear",
   barWidth: 10,
 }).draw();
-  
+
 // Create Amperage Gauge
 var gaugeAmp = new RadialGauge({
   renderTo: 'gauge-amperage',
@@ -59,9 +59,52 @@ var gaugeAmp = new RadialGauge({
   units: "Amperage",
   minValue: 0,
   maxValue: 100,
-  colorValueBoxRect: "#049faa",
+  colorValueBoxRect: "transparent",
   colorValueBoxRectEnd: "#049faa",
   colorValueBoxBackground: "#f1fbfc",
+  valueInt: 2,
+  valueDec: 1,
+  valueTextShadow: true,
+  majorTicks: [
+    "0",
+    "20",
+    "40",
+      "60",
+      "80",
+      "100"
+    ],
+    minorTicks: 4,
+    strokeTicks: true,
+    highlights: [
+      {
+        "from": 80,
+        "to": 100,
+        "color": "#03C0C1"
+      }
+    ],
+    colorPlate: "#fff",
+    borderShadowWidth: 0,
+    borders: false,
+    needleType: "line",
+    colorNeedle: "#007F80",
+    colorNeedleEnd: "#007F80",
+    needleWidth: 2,
+    needleCircleSize: 3,
+    colorNeedleCircleOuter: "#007F80",
+    needleCircleOuter: true,
+    needleCircleInner: false,
+    animationDuration: 1500,
+    animationRule: "linear"
+  }).draw();
+
+  // Create horizAmperage Gauge
+  var gaugeHorizAmp = new LinearGauge({
+  renderTo: 'gauge-HorizAmperage',
+  width: 300,
+  height: 250,
+  units: "Amperage",
+  minValue: 0,
+  maxValue: 100,
   valueInt: 2,
   majorTicks: [
       "0",
@@ -70,30 +113,40 @@ var gaugeAmp = new RadialGauge({
       "60",
       "80",
       "100"
-
-  ],
-  minorTicks: 4,
-  strokeTicks: true,
-  highlights: [
-      {
+    ],
+    minorTicks: 10,
+    strokeTicks: true,
+    highlights: [
+        {
           "from": 80,
+          "to": 90,
+          "color": "rgba(250, 250, 50, .75)"
+        }, 
+        {
+          "from": 90,
           "to": 100,
-          "color": "#03C0C1"
-      }
-  ],
+          "color": "rgba(200, 50, 50, .75)"
+        } 
+      ],
   colorPlate: "#fff",
   borderShadowWidth: 0,
   borders: false,
-  needleType: "line",
-  colorNeedle: "#007F80",
-  colorNeedleEnd: "#007F80",
-  needleWidth: 2,
-  needleCircleSize: 3,
-  colorNeedleCircleOuter: "#007F80",
-  needleCircleOuter: true,
-  needleCircleInner: false,
+  barBeginCircle: false,
+  tickSide: "left",
+  numberSide: "left",
+  needleSide: "left",
+  needleType: "arrow",
+  needleWidth: 5,
+  colorNeedle: "red",
+  colorNeedleEnd: "red",
+  needleShadow: false,
+  colorBarProgressEnd: "#CC2936",
+  animation: true,
   animationDuration: 1500,
-  animationRule: "linear"
+  animationRule: "bounce",
+  animationTarget: "plate",
+  ticksWidth: 15,
+  ticksWidthMinor: 10
 }).draw();
 
 // Function to get current readings on the webpage when it loads for the first time
@@ -104,9 +157,10 @@ function getReadings(){
       var myObj = JSON.parse(this.responseText);
       console.log(myObj);
       var temp = myObj.temperature;
-      var amp = myObj.apperage;
+      var amp = myObj.amperage;
       gaugeTemp.value = temp;
       gaugeAmp.value = amp;
+      gaugeHorizAmp.value = amp;
     }
   }; 
   xhr.open("GET", "/readings", true);
@@ -136,5 +190,6 @@ if (!!window.EventSource) {
     console.log(myObj);
     gaugeTemp.value = myObj.temperature;
     gaugeAmp.value = myObj.amperage;
+    gaugeHorizAmp.value = myObj.amperage;
   }, false);
 }
