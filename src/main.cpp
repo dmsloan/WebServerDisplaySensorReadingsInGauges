@@ -6,11 +6,15 @@
   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 *********/
 
+//! Remember to upload your filesystem image to the board with the "Upload Filesystem Image" command
+//! under the Platform tab under the specific board type. The files that will be uploaded are all in
+//! the "data" folder.
+
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
 #include "SPIFFS.h"
 #include <Arduino_JSON.h>
-#include <Adafruit_BME280.h>
+//#include <Adafruit_BME280.h>
 #include "Secrets.h"    //all the secret stuff goes here such as ssid, passwords, etc.
 
 // Replace with your network credentials
@@ -32,7 +36,7 @@ unsigned long lastTime = 0;
 unsigned long timerDelay = 10000;
 
 // Create a sensor object
-Adafruit_BME280 bme; // BME280 connect to ESP32 I2C (GPIO 21 = SDA, GPIO 22 = SCL)
+// Adafruit_BME280 bme; // BME280 connect to ESP32 I2C (GPIO 21 = SDA, GPIO 22 = SCL)
 
 /* Init BME280
 void initBME(){
