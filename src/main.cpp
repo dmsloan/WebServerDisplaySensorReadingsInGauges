@@ -12,10 +12,25 @@
 
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
+#include <Encoder.h>
 #include "SPIFFS.h"
 #include <Arduino_JSON.h>
 //#include <Adafruit_BME280.h>
 #include "Secrets.h"    //all the secret stuff goes here such as ssid, passwords, etc.
+
+// Change these two numbers to the pins connected to your encoder.
+//   Best Performance: both pins have interrupt capability
+//   Good Performance: only the first pin has interrupt capability
+//   Low Performance:  neither pin has interrupt capability
+//   avoid using pins with LEDs attached
+Encoder myEnc(17, 18);
+long oldPosition  = -999;
+
+bool updated;
+
+#define led 19
+#define over80 23
+#define triggerLED 16
 
 // Replace with your network credentials
 // Defined in Secrets.h
@@ -52,7 +67,7 @@ String getSensorReadings(){
 //  readings["temperature"] = String(bme.readTemperature());
 //  readings["humidity"] =  String(bme.readHumidity());
   readings["temperature"] = String(22.6);
-  readings["amperage"] =  String(68.5);
+  readings["amperage"] =  String(oldPosition);
   String jsonString = JSON.stringify(readings);
   return jsonString;
 }
@@ -67,17 +82,25 @@ void initSPIFFS() {
 
 // Initialize WiFi
 void initWiFi() {
+  bool ledState = false;
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.printf("Connecting to %s ..", ssid);
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print('.');
+    ledState = !ledState;
+    digitalWrite(led, ledState);
     delay(1000);
   }
+  digitalWrite(led, true);
+  Serial.println();
   Serial.println(WiFi.localIP());
 }
 
 void setup() {
+  pinMode(triggerLED,PULLDOWN);
+  pinMode(led, OUTPUT);
+  pinMode(over80, OUTPUT);
   // Serial port for debugging purposes
   Serial.begin(115200);
 //  initBME();
@@ -113,10 +136,37 @@ void setup() {
 }
 
 void loop() {
+  long newPosition = myEnc.read()/4;
+  if (newPosition != oldPosition) {
+    if(newPosition > 100){newPosition = 100; myEnc.write(100*4);}
+    if(newPosition < 0){newPosition = 0; myEnc.write(0);}
+    oldPosition = newPosition;
+    Serial.printf("Mills is: %lu\n", millis());
+    lastTime = millis();
+    updated = false;
+    Serial.println(newPosition);
+    Serial.printf("Time last update is: %lu\n", lastTime);
+    Serial.printf("The webpage update status is %s\n", updated ? "true" : "false");
+    Serial.printf("The webpage has %sbeen updated.\n", updated ? "" : "not ");
+    if(newPosition >= 80){
+      digitalWrite(over80, true);
+      }
+    else{digitalWrite(over80, false);
+      }
+  }
+
+  if ((millis() - lastTime) > 250 && updated == false) {
+    events.send("ping",NULL,millis());
+    events.send(getSensorReadings().c_str(),"new_readings" ,millis());
+    updated = true;
+    Serial.printf("The webpage has %sbeen updated.\n", updated ? "" : "not ");
+  }
+/*
   if ((millis() - lastTime) > timerDelay) {
     // Send Events to the client with the Sensor Readings Every 10 seconds
     events.send("ping",NULL,millis());
     events.send(getSensorReadings().c_str(),"new_readings" ,millis());
     lastTime = millis();
   }
+*/
 }
